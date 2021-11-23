@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package auction;
+
+option go_package = "https://github.com/Troelshjarne/disys_3;auction";
+
+
+message bidMessage{
+   string clientName = 1;
+   int32 amount = 2;
+ }
+
+ // {fail, success or exception}
+message messageAck {
+    string status = 1;
+ }
+ 
+message resultMessage{
+   bool ongoing = 1;
+   string winningClient = 2;
+   int32 highestBid = 3;
+}
+
+message ipMessage{
+    repeated string ips = 1;  
+}
+ 
+message void {
+
+}
+service Communication{
+    rpc result(void) returns (resultMessage){}
+
+    rpc bid(bidMessage) returns (messageAck){}
+    
+    // reset bids,clock, ongoing = true eg. all relevant fields.
+    rpc startAuction(void) returns (void){}
+    // set ongoing = false eg. when times runs out
+    rpc endAuction(void) returns (void) {}
+    // list of ips of replicas (serf)
+    rpc getReplicas(void) returns (ipMessage){}
+
+}
