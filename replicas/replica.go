@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"sync"
 
 	auctionPackage "github.com/Troelshjarne/disys_3/auction"
 	"google.golang.org/grpc"
 )
 
+var Mutex sync.Mutex
 var highestBid = 0
 var ongoing = true
 var winningClient = ""
@@ -20,7 +22,7 @@ type Server struct {
 	//channel map[string][]chan *chatpackage.ChatMessage
 }
 
-func (s *Server) Result() {
+func (s *Server) Result() auctionPackage.ResultMessage {
 
 	// create resultmessage and send to client
 	resultMessage := auctionPackage.ResultMessage{
@@ -31,17 +33,39 @@ func (s *Server) Result() {
 	return resultMessage
 }
 
-func (s *Server) Bid() {
-	ack := auctionPackage.MessageAck{
-		Status: "Bid accepted",
-	}
+// revieves bid -> set 'winningClient'  -> send one of two acknowledgments a
+func (s *Server) Bid(bid auctionPackage.BidMessage) auctionPackage.MessageAck {
+	acknowledgment := auctionPackage.MessageAck{}
+	Mutex.Lock()
+	if bid.Amount > int32(highestBid) {
+		winningClient = bid.ClientName
+		highestBid = int(bid.Amount)
+		ack := auctionPackage.MessageAck{
+			Status: "Bid accepted, and is currently the highest",
+		}
+		acknowledgment = ack
 
-	return ack
+	} else {
+		ack := auctionPackage.MessageAck{
+			Status: fmt.Sprint("Bid not accepted, should exeed the highest bid : \"%v\"", highestBid),
+		}
+		acknowledgment = ack
+
+	}
+	Mutex.Unlock()
+
+	return acknowledgment
 
 }
 
-func (s *Server) StartAuction() {
+//resets bids, ongoing = true, higestbid
+func (s *Server) StartAuction(void auctionPackage.Void) auctionPackage.Void {
 
+	highestBid = 0
+	ongoing = true
+	winningClient = ""
+
+	return void
 }
 
 func (s *Server) EndAuction() {
