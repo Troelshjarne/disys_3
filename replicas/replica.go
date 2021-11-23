@@ -43,7 +43,7 @@ func (s *Server) Bid(bid auctionPackage.BidMessage) auctionPackage.MessageAck {
 		}
 		acknowledgment = ack
 
-	} else if bid.Amount < int32(highestBid) {
+	} else if bid.Amount <= int32(highestBid) {
 		ack := auctionPackage.MessageAck{
 			Status: "Failure",
 		}
