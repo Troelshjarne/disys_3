@@ -96,9 +96,9 @@ func main() {
 
 	// Run auctions for 2 minutes, end them, and start another auction after 15 secs.
 	for {
-		time.Sleep(time.Minute*2)
+		time.Sleep(time.Minute * 2)
 		endAuction()
-		time.Sleep(time.Second*15)
+		time.Sleep(time.Second * 15)
 		startAuction()
 	}
 }
