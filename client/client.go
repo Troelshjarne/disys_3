@@ -2,13 +2,11 @@ package main
 
 import (
 	"bufio"
-	"context"
 	"flag"
 	"log"
 	"os"
 	"strings"
 
-	auction "github.com/Troelshjarne/disys_3/auction"
 	"google.golang.org/grpc"
 )
 
@@ -27,9 +25,9 @@ func main() {
 
 	defer conn.Close()
 
-	ctx := context.Background()
+	//ctx := context.Background()
 
-	client := auction.NewCommunicationClient(conn)
+	//client := auction.NewCommunicationClient(conn)
 
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
