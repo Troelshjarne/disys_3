@@ -17,11 +17,9 @@ var winningClient = ""
 
 type Server struct {
 	auctionPackage.UnimplementedCommunicationServer
-
-	//Map to store channel pointers. These are clients connecting to the service.
-	//channel map[string][]chan *chatpackage.ChatMessage
 }
 
+// returns the current state of the auction
 func (s *Server) Result() auctionPackage.ResultMessage {
 
 	// create resultmessage and send to client
@@ -60,17 +58,19 @@ func (s *Server) Bid(bid auctionPackage.BidMessage) auctionPackage.MessageAck {
 
 //resets bids, ongoing = true, higestbid
 func (s *Server) StartAuction(void auctionPackage.Void) auctionPackage.Void {
-
+	Mutex.Lock()
 	highestBid = 0
 	ongoing = true
 	winningClient = ""
+	Mutex.Unlock()
 
 	return void
 }
 
 func (s *Server) EndAuction(void auctionPackage.Void) auctionPackage.Void {
-
+	Mutex.Lock()
 	ongoing = false
+	Mutex.Unlock()
 
 	return void
 }
