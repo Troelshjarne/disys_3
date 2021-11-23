@@ -41,13 +41,13 @@ func (s *Server) Bid(bid auctionPackage.BidMessage) auctionPackage.MessageAck {
 		winningClient = bid.ClientName
 		highestBid = int(bid.Amount)
 		ack := auctionPackage.MessageAck{
-			Status: "Bid accepted, and is currently the highest",
+			Status: "Success",
 		}
 		acknowledgment = ack
 
 	} else {
 		ack := auctionPackage.MessageAck{
-			Status: fmt.Sprint("Bid not accepted, should exeed the highest bid : \"%v\"", highestBid),
+			Status: "Failure",
 		}
 		acknowledgment = ack
 
@@ -68,12 +68,18 @@ func (s *Server) StartAuction(void auctionPackage.Void) auctionPackage.Void {
 	return void
 }
 
-func (s *Server) EndAuction() {
+func (s *Server) EndAuction(void auctionPackage.Void) auctionPackage.Void {
 
+	ongoing = false
+
+	return void
 }
 
-func (s *Server) GetReplicas() {
+func (s *Server) GetReplicas(void auctionPackage.Void) auctionPackage.IpMessage {
 
+	return auctionPackage.IpMessage{
+		Ips: nil,
+	}
 }
 
 func main() {
