@@ -84,7 +84,7 @@ func (s *Server) GetReplicas(void auctionPackage.Void) auctionPackage.IpMessage 
 
 func main() {
 
-	fmt.Println("=== Node starting up ===")
+	fmt.Println("=== Replica node starting up ===")
 	list, err := net.Listen("tcp", ":9080")
 
 	if err != nil {
