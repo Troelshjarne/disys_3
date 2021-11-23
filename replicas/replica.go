@@ -43,12 +43,17 @@ func (s *Server) Bid(bid auctionPackage.BidMessage) auctionPackage.MessageAck {
 		}
 		acknowledgment = ack
 
-	} else {
+	} else if bid.Amount < int32(highestBid) {
 		ack := auctionPackage.MessageAck{
 			Status: "Failure",
 		}
 		acknowledgment = ack
 
+	} else {
+		ack := auctionPackage.MessageAck{
+			Status: "Exception",
+		}
+		return ack
 	}
 	Mutex.Unlock()
 
