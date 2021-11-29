@@ -34,16 +34,20 @@ func askForIps(ip string) (bool, []string) {
 }
 
 func getIps() {
+	success := false
+	var newIps []string
 	for _, ip := range ips {
-		if success, newIps := askForIps(ip); success {
-			// Overwrite ips.
-			ips = newIps
-			// Exit function after first successful answer.
-			return
+		if success, newIps = askForIps(ip); success {
+			// Exit loop after first successful answer.
+			break
 		}
 	}
-	// Failed to get ips from any replicas; initial connect failed or network is down.
-	log.Fatalf("Failed to retrieve ips from all known ips.\n")
+	if success {
+		ips = newIps
+	} else {
+		// Failed to get ips from any replicas; initial connect failed or network is down.
+		log.Fatalf("Failed to retrieve ips from all known ips.\n")
+	}
 }
 
 func startAuction() {
