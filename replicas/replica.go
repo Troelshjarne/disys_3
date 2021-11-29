@@ -19,7 +19,9 @@ var highestBid = 0
 var ongoing = true
 var winningClient = ""
 
-var port = flag.Int("port", 9080, "Port to connect to")
+var port = flag.Int("port", 8080, "Port to connect to")
+
+var SerfPort = flag.Int("serfport", 9080, "Port to use for Serf")
 var clusterTarget = flag.String("target", "", "Target node in Serf cluster to join. Ex 127.0.0.1:9080")
 
 var serfClient *serf.Serf
@@ -108,7 +110,7 @@ func main() {
 	list, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
 
 	if err != nil {
-		log.Fatalf("Failed to listen on port 9080: %v", err)
+		log.Fatalf("Failed to listen on port %d: %v", *port, err)
 	}
 
 	var options []grpc.ServerOption
@@ -116,7 +118,7 @@ func main() {
 
 	// Serf set-up
 	serfCh := make(chan serf.Event)
-	serfClient, err = serf.Create(getSerfConfig(port, &serfCh))
+	serfClient, err = serf.Create(getSerfConfig(SerfPort, &serfCh))
 	if err != nil {
 		log.Fatalf("Failed to create Serf client. Error: %v", err)
 	}
@@ -134,7 +136,7 @@ func main() {
 			log.Printf("Serf cluster found! Joined cluster of %d clients.", memCount)
 		}
 	} else {
-		log.Printf("Establishing independant Serf cluster on 127.0.0.1:%d\n", *port)
+		log.Printf("Establishing independant Serf cluster on 127.0.0.1:%d\n", *SerfPort)
 	}
 	go announceSerfEvents(&serfCh)
 	go announceSerfMemberList(serfClient)

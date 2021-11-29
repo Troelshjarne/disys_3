@@ -14,7 +14,7 @@ import (
 // Context
 var ctx = context.Background()
 // Initial ip to connect to. Gets further connections from here.
-var seedIp = flag.String("server", ":9080", "TCP Server")
+var seedIp = flag.String("server", ":8080", "TCP Server")
 var options []grpc.DialOption
 
 // IPs to all known replicas
