@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log"
 	"time"
 
@@ -13,6 +14,7 @@ import (
 
 // Context
 var ctx = context.Background()
+
 // Initial ip to connect to. Gets further connections from here.
 var seedIp = flag.String("server", ":8080", "TCP Server")
 var options []grpc.DialOption
@@ -28,8 +30,11 @@ func askForIps(ip string) (bool, []string) {
 	}
 	defer conn.Close()
 	client := auction.NewCommunicationClient(conn)
-	msg, _ := client.GetReplicas(ctx, &auction.Void{})
-
+	var test auction.Void = auction.Void{}
+	msg, err := client.GetReplicas(ctx, &test)
+	time.Sleep(1 * time.Second)
+	fmt.Println(err)
+	fmt.Println(msg.Ips)
 	return true, msg.Ips
 }
 
