@@ -26,7 +26,7 @@ message ipMessage{
 }
  
 message void {
-
+ bool fakeInfo = 1;
 }
 service Communication{
     rpc result(void) returns (resultMessage){}

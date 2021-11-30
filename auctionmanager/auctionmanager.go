@@ -13,6 +13,7 @@ import (
 
 // Context
 var ctx = context.Background()
+
 // Initial ip to connect to. Gets further connections from here.
 var seedIp = flag.String("server", ":8080", "TCP Server")
 var options []grpc.DialOption
@@ -31,6 +32,7 @@ func askForIps(ip string) (bool, []string) {
 	}
 	defer conn.Close()
 	client := auction.NewCommunicationClient(conn)
+
 	msg, err := client.GetReplicas(ctx, &auction.Void{})
 	if err != nil {
 		log.Printf("Failed to send message to %s\n", ip)
