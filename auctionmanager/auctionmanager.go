@@ -21,19 +21,29 @@ var options []grpc.DialOption
 var ips []string
 
 func askForIps(ip string) (bool, []string) {
+	log.Printf("Attempting to connect to %s\n", ip)
 	conn, err := grpc.Dial(ip, options...)
 	if err != nil {
 		log.Printf("Failed to connect to %s\n", ip)
 		return false, nil
+	} else {
+		log.Printf("Successfully connected to %s\n", ip)
 	}
 	defer conn.Close()
 	client := auction.NewCommunicationClient(conn)
-	msg, _ := client.GetReplicas(ctx, &auction.Void{})
+	msg, err := client.GetReplicas(ctx, &auction.Void{})
+	if err != nil {
+		log.Printf("Failed to send message to %s\n", ip)
+		return false, nil
+	} else {
+		log.Printf("Successfully retrieved ips from %s\n", ip)
+	}
 
 	return true, msg.Ips
 }
 
 func getIps() {
+	log.Printf("Initializing IP retrieval\n")
 	success := false
 	var newIps []string
 	for _, ip := range ips {
@@ -44,6 +54,7 @@ func getIps() {
 	}
 	if success {
 		ips = newIps
+		log.Printf("IP list overwritten\n")
 	} else {
 		// Failed to get ips from any replicas; initial connect failed or network is down.
 		log.Fatalf("Failed to retrieve ips from all known ips.\n")
@@ -91,6 +102,7 @@ func endAuction() {
 }
 
 func main() {
+	flag.Parse()
 	// Add dial options.
 	options = append(options, grpc.WithBlock(), grpc.WithInsecure())
 
