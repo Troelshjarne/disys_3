@@ -182,7 +182,7 @@ func getSerfConfig(port *int, eventCh *chan serf.Event) *serf.Config {
 
 	conf.MemberlistConfig.BindAddr = "127.0.0.1"
 	conf.MemberlistConfig.BindPort = *port
-	conf.NodeName = fmt.Sprintf("Replicant:%d", port)
+	conf.NodeName = fmt.Sprintf("Replicant:%d", *port)
 	conf.ValidateNodeNames = false
 
 	// Set probe intervals that are aggressive for finding bad nodes
