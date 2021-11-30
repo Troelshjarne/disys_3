@@ -16,7 +16,7 @@ import (
 )
 
 var userName = flag.String("user", "default", "Users name")
-var tcpServer = flag.String("server", ":9080", "TCP Server")
+var tcpServer = flag.String("server", ":8080", "TCP Server")
 
 var options []grpc.DialOption
 

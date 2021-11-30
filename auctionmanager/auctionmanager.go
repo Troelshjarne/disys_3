@@ -16,28 +16,42 @@ import (
 var ctx = context.Background()
 
 // Initial ip to connect to. Gets further connections from here.
-var seedIp = flag.String("server", ":9080", "TCP Server")
+var seedIp = flag.String("server", ":8080", "TCP Server")
 var options []grpc.DialOption
 
 // IPs to all known replicas
 var ips []string
 
 func askForIps(ip string) (bool, []string) {
+<<<<<<< HEAD
 	fmt.Println("Asking for ips...")
+=======
+	log.Printf("Attempting to connect to %s\n", ip)
+>>>>>>> 10ffc93fa27d3dcdb5fb0e8d9769e344c1825dcb
 	conn, err := grpc.Dial(ip, options...)
 	if err != nil {
 		log.Printf("Failed to connect to %s\n", ip)
 		return false, nil
+	} else {
+		log.Printf("Successfully connected to %s\n", ip)
 	}
 	fmt.Println("One more print")
 	defer conn.Close()
 	client := auction.NewCommunicationClient(conn)
-	msg, _ := client.GetReplicas(ctx, &auction.Void{})
+
+	msg, err := client.GetReplicas(ctx, &auction.Void{})
+	if err != nil {
+		log.Printf("Failed to send message to %s\n", ip)
+		return false, nil
+	} else {
+		log.Printf("Successfully retrieved ips from %s\n", ip)
+	}
 
 	return true, msg.Ips
 }
 
 func getIps() {
+<<<<<<< HEAD
 	fmt.Println("Gettings ips")
 	fmt.Println(ips)
 	for _, ip := range ips {
@@ -48,10 +62,24 @@ func getIps() {
 			ips = newIps
 			// Exit function after first successful answer.
 			return
+=======
+	log.Printf("Initializing IP retrieval\n")
+	success := false
+	var newIps []string
+	for _, ip := range ips {
+		if success, newIps = askForIps(ip); success {
+			// Exit loop after first successful answer.
+			break
+>>>>>>> 10ffc93fa27d3dcdb5fb0e8d9769e344c1825dcb
 		}
 	}
-	// Failed to get ips from any replicas; initial connect failed or network is down.
-	log.Fatalf("Failed to retrieve ips from all known ips.\n")
+	if success {
+		ips = newIps
+		log.Printf("IP list overwritten\n")
+	} else {
+		// Failed to get ips from any replicas; initial connect failed or network is down.
+		log.Fatalf("Failed to retrieve ips from all known ips.\n")
+	}
 }
 
 func startAuction() {
@@ -95,7 +123,10 @@ func endAuction() {
 }
 
 func main() {
+<<<<<<< HEAD
 	// Parse flags
+=======
+>>>>>>> 10ffc93fa27d3dcdb5fb0e8d9769e344c1825dcb
 	flag.Parse()
 	// Add dial options.
 	options = append(options, grpc.WithBlock(), grpc.WithInsecure())

@@ -20,7 +20,9 @@ var highestBid = 0
 var ongoing = true
 var winningClient = ""
 
-var port = flag.Int("port", 9080, "Port to connect to")
+var gRPCport = flag.Int("gRPCport", 8080, "Port to connect to")
+
+var SerfPort = flag.Int("serfport", 9080, "Port to use for Serf")
 var clusterTarget = flag.String("target", "", "Target node in Serf cluster to join. Ex 127.0.0.1:9080")
 
 var serfClient *serf.Serf
@@ -94,9 +96,11 @@ func (s *Server) GetReplicas(void auctionPackage.Void) auctionPackage.IpMessage 
 	var ips []string
 
 	for _, member := range serfClient.Members() {
-		ips = append(ips, fmt.Sprintf("%s:%d", member.Addr, member.Port))
-	}
 
+		ips = append(ips, fmt.Sprintf("%s:%d", member.Addr, member.Port))
+
+	}
+	log.Println(ips)
 	return auctionPackage.IpMessage{
 		Ips: ips,
 	}
@@ -106,20 +110,16 @@ func main() {
 	flag.Parse()
 
 	fmt.Println("=== Replica node starting up ===")
-	list, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
-
-	if err != nil {
-		log.Fatalf("Failed to listen on port 9080: %v", err)
-	}
-
-	var options []grpc.ServerOption
-	grpcServer := grpc.NewServer(options...)
 
 	// Serf set-up
 	serfCh := make(chan serf.Event)
-	serfClient, err = serf.Create(getSerfConfig(port, &serfCh))
+	var err error
+	log.Printf("Attempting to create Serf client on gRPCport %d\n", *SerfPort)
+	serfClient, err = serf.Create(getSerfConfig(SerfPort, &serfCh))
 	if err != nil {
 		log.Fatalf("Failed to create Serf client. Error: %v", err)
+	} else {
+		log.Printf("Successfully started Serf client on gRPCport %d\n", *SerfPort)
 	}
 	defer serfClient.Shutdown()
 
@@ -135,13 +135,28 @@ func main() {
 			log.Printf("Serf cluster found! Joined cluster of %d clients.", memCount)
 		}
 	} else {
-		log.Printf("Establishing independant Serf cluster on 127.0.0.1:%d\n", *port)
+		log.Printf("Establishing independant Serf cluster on 127.0.0.1:%d\n", *SerfPort)
 	}
 	go announceSerfEvents(&serfCh)
 	go announceSerfMemberList(serfClient)
-	// Serf set-up complete.
 
-	grpcServer.Serve(list)
+	// gRPC setup.
+
+	log.Printf("Attempting to listen on gRPCport %d\n", *gRPCport)
+	list, err := net.Listen("tcp", fmt.Sprintf(":%d", *gRPCport))
+	if err != nil {
+		log.Fatalf("Failed to listen on gRPCport %d: %v", *gRPCport, err)
+	}
+
+	var options []grpc.ServerOption
+	grpcServer := grpc.NewServer(options...)
+
+	err = grpcServer.Serve(list)
+	if err != nil {
+		log.Fatalf("Failed to start gRPC server.")
+	} else {
+		log.Printf("Successfully started gRPC server on gRPCport %d\n", *gRPCport)
+	}
 }
 
 func announceSerfEvents(ch *chan serf.Event) {
