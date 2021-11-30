@@ -3,12 +3,13 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/hashicorp/serf/serf"
 	"log"
 	"net"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/hashicorp/serf/serf"
 
 	auctionPackage "github.com/Troelshjarne/disys_3/auction"
 	"google.golang.org/grpc"
@@ -126,7 +127,7 @@ func main() {
 		log.Printf("Attempting to join Serf cluster on IP: %s\n", *clusterTarget)
 		memCount, err := serfClient.Join(
 			// Join "Replicant:{port}/{ip}"
-			[]string{ fmt.Sprintf("Replicant:%d/%s", strings.Split(*clusterTarget, ":")[1], clusterTarget) },
+			[]string{fmt.Sprintf("Replicant:%s/%s", strings.Split(*clusterTarget, ":")[1], *clusterTarget)},
 			false)
 		if err != nil {
 			log.Fatalf("Failed to join Serf cluster. Error: %v", err)
@@ -145,14 +146,14 @@ func main() {
 
 func announceSerfEvents(ch *chan serf.Event) {
 	for {
-		event := <- *ch
+		event := <-*ch
 		log.Printf("Received Serf event: %v", event)
 	}
 }
 
 func announceSerfMemberList(client *serf.Serf) {
 	for {
-		time.Sleep(time.Second*10)
+		time.Sleep(time.Second * 10)
 		log.Printf("Current Serf cluster size: %d\nMembers:", client.NumNodes())
 		for _, mem := range client.Members() {
 			log.Printf("\t%s | %s:%d\n", mem.Name, mem.Addr, mem.Port)

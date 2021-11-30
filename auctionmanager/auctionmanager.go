@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log"
 	"time"
 
@@ -13,6 +14,7 @@ import (
 
 // Context
 var ctx = context.Background()
+
 // Initial ip to connect to. Gets further connections from here.
 var seedIp = flag.String("server", ":9080", "TCP Server")
 var options []grpc.DialOption
@@ -21,11 +23,13 @@ var options []grpc.DialOption
 var ips []string
 
 func askForIps(ip string) (bool, []string) {
+	fmt.Println("Asking for ips...")
 	conn, err := grpc.Dial(ip, options...)
 	if err != nil {
 		log.Printf("Failed to connect to %s\n", ip)
 		return false, nil
 	}
+	fmt.Println("One more print")
 	defer conn.Close()
 	client := auction.NewCommunicationClient(conn)
 	msg, _ := client.GetReplicas(ctx, &auction.Void{})
@@ -34,9 +38,13 @@ func askForIps(ip string) (bool, []string) {
 }
 
 func getIps() {
+	fmt.Println("Gettings ips")
+	fmt.Println(ips)
 	for _, ip := range ips {
+		fmt.Println("Looping over ips")
 		if success, newIps := askForIps(ip); success {
 			// Overwrite ips.
+			fmt.Println("Overwriting ips")
 			ips = newIps
 			// Exit function after first successful answer.
 			return
@@ -87,11 +95,14 @@ func endAuction() {
 }
 
 func main() {
+	// Parse flags
+	flag.Parse()
 	// Add dial options.
 	options = append(options, grpc.WithBlock(), grpc.WithInsecure())
 
 	// Add seed ip to list and try to get it propagate further ips.
 	ips = append(ips, *seedIp)
+	fmt.Printf("Current IPs before calling getIps()= %v", ips)
 	getIps()
 
 	// Run auctions for 2 minutes, end them, and start another auction after 15 secs.

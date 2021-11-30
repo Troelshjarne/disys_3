@@ -27,13 +27,18 @@ var ips []string
 
 func main() {
 
+	fmt.Printf("\n=== Welcome to the BidIT - ITUs auction house! === \n \n")
+	fmt.Println("Let's get ready to bid on some neat items...")
+
 	//Dial options
 	options = append(options, grpc.WithBlock(), grpc.WithInsecure())
 
 	//Get ips
+	fmt.Println("Getting ips from replicas...")
 	ips = append(ips, *tcpServer)
 	getIps()
 
+	fmt.Println("IPs found!")
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
 		text := scanner.Text()
