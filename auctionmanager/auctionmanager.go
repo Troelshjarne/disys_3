@@ -23,11 +23,7 @@ var options []grpc.DialOption
 var ips []string
 
 func askForIps(ip string) (bool, []string) {
-<<<<<<< HEAD
-	fmt.Println("Asking for ips...")
-=======
 	log.Printf("Attempting to connect to %s\n", ip)
->>>>>>> 10ffc93fa27d3dcdb5fb0e8d9769e344c1825dcb
 	conn, err := grpc.Dial(ip, options...)
 	if err != nil {
 		log.Printf("Failed to connect to %s\n", ip)
@@ -39,9 +35,9 @@ func askForIps(ip string) (bool, []string) {
 	defer conn.Close()
 	client := auction.NewCommunicationClient(conn)
 
-	msg, err := client.GetReplicas(ctx, &auction.Void{})
+	msg, err := client.GetReplicas(ctx, &auction.Void{FakeInfo: true})
 	if err != nil {
-		log.Printf("Failed to send message to %s\n", ip)
+		log.Printf("Failed to send message to %s \nError: %v \n", ip, err)
 		return false, nil
 	} else {
 		log.Printf("Successfully retrieved ips from %s\n", ip)
@@ -51,18 +47,6 @@ func askForIps(ip string) (bool, []string) {
 }
 
 func getIps() {
-<<<<<<< HEAD
-	fmt.Println("Gettings ips")
-	fmt.Println(ips)
-	for _, ip := range ips {
-		fmt.Println("Looping over ips")
-		if success, newIps := askForIps(ip); success {
-			// Overwrite ips.
-			fmt.Println("Overwriting ips")
-			ips = newIps
-			// Exit function after first successful answer.
-			return
-=======
 	log.Printf("Initializing IP retrieval\n")
 	success := false
 	var newIps []string
@@ -70,7 +54,6 @@ func getIps() {
 		if success, newIps = askForIps(ip); success {
 			// Exit loop after first successful answer.
 			break
->>>>>>> 10ffc93fa27d3dcdb5fb0e8d9769e344c1825dcb
 		}
 	}
 	if success {
@@ -86,7 +69,6 @@ func startAuction() {
 	// Update client list before sending message.
 	getIps()
 
-	// TODO: send message to all clients, to start a new auction.
 	log.Printf("Starting auction.\n")
 	for _, ip := range ips {
 		go func() {
@@ -106,7 +88,6 @@ func endAuction() {
 	// Update client list before sending message.
 	getIps()
 
-	// TODO: send message to all clients, that the auction is over.
 	log.Printf("Ending auction.\n")
 	for _, ip := range ips {
 		go func() {
@@ -123,10 +104,6 @@ func endAuction() {
 }
 
 func main() {
-<<<<<<< HEAD
-	// Parse flags
-=======
->>>>>>> 10ffc93fa27d3dcdb5fb0e8d9769e344c1825dcb
 	flag.Parse()
 	// Add dial options.
 	options = append(options, grpc.WithBlock(), grpc.WithInsecure())
