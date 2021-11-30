@@ -14,5 +14,5 @@ A replica stores data about a giving auction and can be queried, returning the i
 a replica joins a cluster of replica, administrated be the Serf.
 
 ## Client 
-Run clients with - <code>go run -user {username}</code>
+Run clients with - <code>go run -user {username} -server {“127.0.0.1:8080”}</code>
 A Client can bid on a auction and send a query reqesting the status of a auction. 
